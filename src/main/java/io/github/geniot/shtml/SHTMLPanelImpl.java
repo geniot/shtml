@@ -18,25 +18,31 @@
  */
 package io.github.geniot.shtml;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.net.*;
-
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.text.*;
-import javax.swing.text.html.*;
-import javax.swing.undo.*;
-import java.util.*;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
-
 import io.github.geniot.shtml.SHTMLEditorKitActions.ChangeFontSizeAction.Change;
 import io.github.geniot.shtml.SHTMLEditorKitActions.SetStyleAction;
 import io.github.geniot.shtml.SHTMLEditorKitActions.SetTagAction;
-import java.util.prefs.*;
+
+import javax.swing.*;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
+import javax.swing.text.*;
+import javax.swing.text.html.CSS;
+import javax.swing.text.html.HTML;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.StyleSheet;
+import javax.swing.undo.UndoManager;
+import java.awt.*;
+import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.util.*;
+import java.util.prefs.Preferences;
 
 /**
  * Main component of application SimplyHTML.
@@ -53,11 +59,9 @@ import java.util.prefs.*;
  * @author <a href="http://www.lightdev.com">http://www.lightdev.com</a>
  * @author <a href="mailto:info@lightdev.com">info@lightdev.com</a>
  * @author published under the terms and conditions of the
- *      GNU General Public License,
- *      for details see file gpl.txt in the distribution
- *      package of this software
- *
- *
+ * GNU General Public License,
+ * for details see file gpl.txt in the distribution
+ * package of this software
  */
 public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
     private static final String SHOW_TOOLBARS_PROPERTY = "show_toolbars";
@@ -70,19 +74,25 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
     public static final String ACTION_UNSELECTED = "false";
     public static final String FILE_LAST_OPEN = "lastOpenFileName";
     public static final String FILE_LAST_SAVE = "lastSaveFileName";
-    /** single instance of a dynamic resource for use by all */
+    /**
+     * single instance of a dynamic resource for use by all
+     */
     public DynamicResource dynRes = new DynamicResource();
-    /** SimplyHTML's main resource bundle (plug-ins use their own) */
+    /**
+     * SimplyHTML's main resource bundle (plug-ins use their own)
+     */
     private static UIResources uiResources = null;
 
     public static UIResources getUiResources() {
         if (uiResources == null) {
-        	setInternalUiResources();
+            setInternalUiResources();
         }
         return uiResources;
     }
 
-    /** the plug-in manager of SimplyHTML */
+    /**
+     * the plug-in manager of SimplyHTML
+     */
     public static PluginManager pluginManager; // = new PluginManager(mainFrame);
     protected ActionListener openHyperlinkHandler = null;
 
@@ -103,50 +113,77 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
                 props.load(in);
             }
             final ResourceBundle resourceBundle = ResourceBundle.getBundle(
-                "SimplyHTML", Locale.getDefault());
+                    "SimplyHTML", Locale.getDefault());
             return new InternalUiResources(resourceBundle, props);
-        }
-        catch (final Exception ex) {
+        } catch (final Exception ex) {
             Util.errMsg(null, "resources not found", ex);
             return null;
         }
     }
 
     private final SHTMLMenuBar menuBar;
-    /** currently active DocumentPane */
+    /**
+     * currently active DocumentPane
+     */
     private DocumentPane documentPane;
-    /** currently active SHTMLEditorPane */
+    /**
+     * currently active SHTMLEditorPane
+     */
     private SHTMLEditorPane editorPane;
-    /** currently active SHTMLDocument */
+    /**
+     * currently active SHTMLDocument
+     */
     protected SHTMLDocument doc;
     private JPanel toolBarPanel;
-    /** tool bar for formatting commands */
+    /**
+     * tool bar for formatting commands
+     */
     private JToolBar formatToolBar;
-    /** tool bar for formatting commands */
+    /**
+     * tool bar for formatting commands
+     */
     private JToolBar paraToolBar;
-    /** plugin menu ID */
+    /**
+     * plugin menu ID
+     */
     public final String pluginMenuId = "plugin";
-    /** help menu ID */
+    /**
+     * help menu ID
+     */
     public final String helpMenuId = "help";
-    /** id in TextResources for a relative path to an empty menu icon */
+    /**
+     * id in TextResources for a relative path to an empty menu icon
+     */
     private final String emptyIcon = "emptyIcon";
-    /** watch for repeated key events */
+    /**
+     * watch for repeated key events
+     */
     private final RepeatKeyWatcher rkw = new RepeatKeyWatcher(40);
-    /** counter for newly created documents */
+    /**
+     * counter for newly created documents
+     */
     int newDocCounter = 0;
-    /** reference to application temp directory */
+    /**
+     * reference to application temp directory
+     */
     private static File appTempDir;
-	private static ActionBuilder actionBuilder;
-    /** tool bar selector for certain tags */
+    private static ActionBuilder actionBuilder;
+    /**
+     * tool bar selector for certain tags
+     */
     private TagSelector tagSelector;
-    /** panel for plug-in display */
+    /**
+     * panel for plug-in display
+     */
     SplitPanel splitPanel;
-    /** indicates, whether document activation shall be handled */
+    /**
+     * indicates, whether document activation shall be handled
+     */
     boolean ignoreActivateDoc = false;
     private final JPopupMenu editorPopup;
     /**
      * action names
-     *
+     * <p>
      * these have to correspond with the keys in the
      * resource bundle to allow for dynamic
      * menu creation and control
@@ -157,7 +194,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
     public static final String cutAction = "cut";
     public static final String copyAction = "copy";
     public static final String pasteAction = "paste";
-    public static final String pasteOtherAction ="pasteOther";
+    public static final String pasteOtherAction = "pasteOther";
     public static final String selectAllAction = "selectAll";
     public static final String clearFormatAction = "clearFormat";
     public static final String fontAction = "font";
@@ -224,7 +261,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
     public static final String printAction = "print";
 
     public static SHTMLPanelImpl getOwnerSHTMLPanel(Component c) {
-        for (;;) {
+        for (; ; ) {
             if (c == null) {
                 return null;
             }
@@ -235,15 +272,17 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
         }
     }
 
-    /** construct a new main application frame */
+    /**
+     * construct a new main application frame
+     */
     SHTMLPanelImpl(boolean isComponent) {
         super(new BorderLayout());
-        if (!isComponent){
+        if (!isComponent) {
             SplashScreen.showInstance();
         }
         enableEvents(AWTEvent.WINDOW_EVENT_MASK);
         initActions();
-        if(actionBuilder != null){
+        if (actionBuilder != null) {
             actionBuilder.initActions(this);
         }
         menuBar = dynRes.createMenubar(uiResources, "menubar");
@@ -254,8 +293,10 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
             setJMenuBar(menuBar);
         }
         customizeFrame(isComponent);
-        initAppTempDir();
-        initPlugins();
+        if (!isComponent) {
+            initAppTempDir();
+            initPlugins();
+        }
         initDocumentPane(isComponent);
         updateActions();
         if (!isComponent) {
@@ -267,17 +308,16 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
     private void setJMenuBar(final JMenuBar bar) {
         add(bar, BorderLayout.NORTH);
     }
-    
-    
+
 
     @Override
     public void shtmlPrefChanged(String propertyName, String newValue, String oldValue) {
-        if(SHOW_TOOLBARS_PROPERTY.equals(propertyName)) {
-            toolBarPanel.setVisible(! "false".equalsIgnoreCase(newValue));
+        if (SHOW_TOOLBARS_PROPERTY.equals(propertyName)) {
+            toolBarPanel.setVisible(!"false".equalsIgnoreCase(newValue));
             return;
         }
-        if(SHOW_MENU_PROPERTY.equals(propertyName)) {
-            menuBar.setVisible(! "false".equalsIgnoreCase(newValue));
+        if (SHOW_MENU_PROPERTY.equals(propertyName)) {
+            menuBar.setVisible(!"false".equalsIgnoreCase(newValue));
             return;
         }
 
@@ -303,10 +343,10 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
     }
 
     /**
-       * get the DynamicResource used in this instance of FrmMain
-       *
-       * @return the DynamicResource
-       */
+     * get the DynamicResource used in this instance of FrmMain
+     *
+     * @return the DynamicResource
+     */
     DynamicResource getDynRes() {
         return dynRes;
     }
@@ -331,6 +371,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
 
     /**
      * Convenience method for obtaining the document text
+     *
      * @return returns the document text as string.
      */
     public String getDocumentText() {
@@ -344,7 +385,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
     /**
      * indicates whether or not the document needs to be saved.
      *
-     * @return  true, if changes need to be saved
+     * @return true, if changes need to be saved
      */
     public boolean needsSaving() {
         return getDocumentPane().needsSaving();
@@ -397,8 +438,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
         if (getDocumentPane() != null) {
             //System.out.println("FrmMain.addDocumentPaneListener documentPane.source=" + documentPane.getSource());
             getDocumentPane().addDocumentPaneListener(listener);
-        }
-        else {
+        } else {
             //System.out.println("FrmMain.addDocumentPaneListener documentPane is null, did not add");
         }
     }
@@ -467,24 +507,36 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
      * is necessary.</p>
      */
     class RepeatKeyWatcher implements KeyListener {
-        /** timer for handling keyReleased events */
+        /**
+         * timer for handling keyReleased events
+         */
         private final java.util.Timer releaseTimer = new java.util.Timer();
-        /** the next scheduled task for a keyReleased event */
+        /**
+         * the next scheduled task for a keyReleased event
+         */
         private ReleaseTask nextTask;
-        /** time of the last keyPressed event */
+        /**
+         * time of the last keyPressed event
+         */
         private long lastWhen = 0;
-        /** time of the current KeyEvent */
+        /**
+         * time of the current KeyEvent
+         */
         private long when;
-        /** delay to distinguish between single and repeated events */
+        /**
+         * delay to distinguish between single and repeated events
+         */
         private final long delay;
-        /** indicates whether or not a KeyEvent currently occurs repeatedly */
+        /**
+         * indicates whether or not a KeyEvent currently occurs repeatedly
+         */
         private boolean repeating = false;
 
         /**
          * construct a <code>RepeatKeyWatcher</code>
          *
-         * @param delay  the delay in milliseconds until a
-         * keyReleased event should be handled
+         * @param delay the delay in milliseconds until a
+         *              keyReleased event should be handled
          */
         RepeatKeyWatcher(final long delay) {
             super();
@@ -503,8 +555,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
             when = e.getWhen();
             if ((when - lastWhen) <= delay) {
                 repeating = true;
-            }
-            else {
+            } else {
                 repeating = false;
             }
             lastWhen = when;
@@ -539,14 +590,11 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
                 if (EventQueue.isDispatchThread()) {
                     repeating = false;
                     updateFormatControls();
-                }
-                else {
+                } else {
                     try {
                         EventQueue.invokeAndWait(this);
-                    }
-                    catch (final InterruptedException e) {
-                    }
-                    catch (final InvocationTargetException e) {
+                    } catch (final InterruptedException e) {
+                    } catch (final InvocationTargetException e) {
                     }
                 }
             }
@@ -560,7 +608,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
     /**
      * refresh the display for a given plug-in
      *
-     * @param pi  the plug-in to refresh
+     * @param pi the plug-in to refresh
      */
     public void refreshPluginDisplay(final SHTMLPlugin pi) {
         final JMenu pMenu = dynRes.getMenu(pluginMenuId);
@@ -595,9 +643,9 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
                 if (((panelNo == SplitPanel.WEST) && splitPanel.getDivLoc(panelNo) < this.getWidth() / 10)
                         || ((panelNo == SplitPanel.NORTH) && splitPanel.getDivLoc(panelNo) < this.getHeight() / 10)
                         || ((panelNo == SplitPanel.EAST) && splitPanel.getDivLoc(panelNo) > this.getWidth()
-                                - (this.getWidth() / 10))
+                        - (this.getWidth() / 10))
                         || ((panelNo == SplitPanel.SOUTH) && splitPanel.getDivLoc(panelNo) > this.getHeight()
-                                - (this.getHeight() / 10))) {
+                        - (this.getHeight() / 10))) {
                     splitPanel.setDivLoc(panelNo, loc);
                 }
             }
@@ -627,8 +675,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
                 hMenu.insert(helpMenu, hMenu.getItemCount() - 2);
             }
             SwingUtilities.invokeLater(new PluginInfo(pi));
-        }
-        else {
+        } else {
             if (pluginMenu != null) {
                 pMenu.remove(pluginMenu);
             }
@@ -661,8 +708,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
                 return;
             }
             SHTMLHelpBroker.initJavaHelpItem(mi, "item15");
-        }
-        catch (final Throwable e) {
+        } catch (final Throwable e) {
             System.err.println("Simply HTML : Warning : loading help failed.");
             // --Dan
             //Util.errMsg(this,
@@ -672,17 +718,17 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
     }
 
     protected void initDocumentPane(boolean isComponent) {
-        //TODO
+        throw new RuntimeException ("Not implemented");
     }
 
     /**
-    * instantiate Actions and put them into the commands
-    * Hashtable for later use along with their action commands.
-    *
-    * This is hard coded as Actions need to be instantiated
-    * hard coded anyway, so we do the storage in <code>commands</code>
-    * right away.
-    */
+     * instantiate Actions and put them into the commands
+     * Hashtable for later use along with their action commands.
+     * <p>
+     * This is hard coded as Actions need to be instantiated
+     * hard coded anyway, so we do the storage in <code>commands</code>
+     * right away.
+     */
     protected void initActions() {
         addAction(setDefaultStyleRefAction, new SHTMLEditorKitActions.SetDefaultStyleRefAction(this));
         addAction(documentTitleAction, new SHTMLEditorKitActions.DocumentTitleAction(this));
@@ -700,9 +746,9 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
         addAction(insertImageAction, new SHTMLEditorKitActions.InsertImageAction(this));
         addAction(editPrefsAction, new SHTMLEditorKitActions.SHTMLEditPrefsAction(this));
         addAction(toggleBulletsAction, new SHTMLEditorKitActions.ToggleListAction(this, toggleBulletsAction,
-            HTML.Tag.UL));
+                HTML.Tag.UL));
         addAction(toggleNumbersAction, new SHTMLEditorKitActions.ToggleListAction(this, toggleNumbersAction,
-            HTML.Tag.OL));
+                HTML.Tag.OL));
         addAction(formatListAction, new SHTMLEditorKitActions.FormatListAction(this));
         addAction(ManagePluginsAction.managePluginsAction, new ManagePluginsAction());
         addAction(elemTreeAction, new SHTMLEditorKitActions.ShowElementTreeAction(this));
@@ -720,12 +766,12 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
         addAction(fontSizeAction, new SHTMLEditorKitActions.FontSizeAction(this));
         addAction(increaseFontSizeAction, new SHTMLEditorKitActions.ChangeFontSizeAction(this, increaseFontSizeAction, Change.INCREASE));
         addAction(decreaseFontSizeAction, new SHTMLEditorKitActions.ChangeFontSizeAction(this, decreaseFontSizeAction, Change.DECREASE));
-        
+
         addAction(insertTableAction, new SHTMLEditorKitActions.InsertTableAction(this));
         addAction(insertTableRowAction, new SHTMLEditorKitActions.InsertTableRowAction(this, null,
-            insertTableRowAction));
+                insertTableRowAction));
         addAction(insertTableRowHeaderAction, new SHTMLEditorKitActions.InsertTableRowAction(this, "th",
-            insertTableRowHeaderAction));
+                insertTableRowHeaderAction));
         addAction(insertTableColAction, new SHTMLEditorKitActions.InsertTableColAction(this));
         addAction(appendTableColAction, new SHTMLEditorKitActions.AppendTableColAction(this));
         addAction(appendTableRowAction, new SHTMLEditorKitActions.AppendTableRowAction(this));
@@ -747,29 +793,29 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
         addAction(blueFontColorAction, new SHTMLEditorKitActions.FixedFontColorAction(this, blueFontColorAction, DARK_BLUE, LIGHT_BLUE));
         addAction(blackFontColorAction, new SHTMLEditorKitActions.FixedFontColorAction(this, blackFontColorAction, Color.BLACK, Color.WHITE));
         addAction(removeFontColorAction, new SHTMLEditorKitActions.RemoveStyleAttributeAction(this, removeFontColorAction, HTML.Attribute.COLOR, CSS.Attribute.COLOR));
-        
+
         addAction(fontStrikethroughAction, new SHTMLEditorKitActions.ApplyCSSAttributeAction(this,
-            fontStrikethroughAction, CSS.Attribute.TEXT_DECORATION, "line-through", false));
+                fontStrikethroughAction, CSS.Attribute.TEXT_DECORATION, "line-through", false));
         addAction(paraAlignLeftAction, new SHTMLEditorKitActions.ApplyCSSAttributeAction(this,
-            paraAlignLeftAction, CSS.Attribute.TEXT_ALIGN, Util.CSS_ATTRIBUTE_ALIGN_LEFT, true));
+                paraAlignLeftAction, CSS.Attribute.TEXT_ALIGN, Util.CSS_ATTRIBUTE_ALIGN_LEFT, true));
         addAction(paraAlignCenterAction, new SHTMLEditorKitActions.ApplyCSSAttributeAction(this,
-            paraAlignCenterAction, CSS.Attribute.TEXT_ALIGN, Util.CSS_ATTRIBUTE_ALIGN_CENTER, true));
+                paraAlignCenterAction, CSS.Attribute.TEXT_ALIGN, Util.CSS_ATTRIBUTE_ALIGN_CENTER, true));
         addAction(paraAlignRightAction, new SHTMLEditorKitActions.ApplyCSSAttributeAction(this,
-            paraAlignRightAction, CSS.Attribute.TEXT_ALIGN, Util.CSS_ATTRIBUTE_ALIGN_RIGHT, true));
+                paraAlignRightAction, CSS.Attribute.TEXT_ALIGN, Util.CSS_ATTRIBUTE_ALIGN_RIGHT, true));
         addAction(testAction, new SHTMLEditorKitActions.SHTMLTestAction(this));
         addAction(printAction, new SHTMLEditorKitActions.PrintAction(this));
     }
 
-    public static void setActionBuilder(final ActionBuilder ab){
-    	SHTMLPanelImpl.actionBuilder = ab;
+    public static void setActionBuilder(final ActionBuilder ab) {
+        SHTMLPanelImpl.actionBuilder = ab;
     }
 
     public void addAction(String text, Action action) {
-		dynRes.addAction(text, action);
-		
-	}
+        dynRes.addAction(text, action);
 
-	/**
+    }
+
+    /**
      * update all actions
      */
     public void updateActions() {
@@ -783,12 +829,14 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
         }
     }
 
-    /** customize the frame to our needs */
+    /**
+     * customize the frame to our needs
+     */
     protected void customizeFrame(boolean isComponent) {
         if (isComponent || Util.getPreference(SHOW_MENU_PROPERTY, "true").equalsIgnoreCase("false")) {
             menuBar.setVisible(false);
         }
-        splitPanel = new SplitPanel();
+        splitPanel = new SplitPanel(isComponent);
         for (int i = 0; i < 4; i++) {
             final JTabbedPane p = new JTabbedPane();
             p.setVisible(false);
@@ -796,7 +844,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
         }
         toolBarPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0)) {
             /**
-             * 
+             *
              */
             private static final long serialVersionUID = 1L;
 
@@ -812,13 +860,11 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
                         height += rowHeight + compPreferredSize.height;
                         rowHeight = 0;
                         width = 0;
-                    }
-                    else if (maxWidth < width + compPreferredSize.width) {
+                    } else if (maxWidth < width + compPreferredSize.width) {
                         height += rowHeight;
                         rowHeight = compPreferredSize.height;
                         width = compPreferredSize.width;
-                    }
-                    else {
+                    } else {
                         rowHeight = Math.max(rowHeight, compPreferredSize.height);
                         width += compPreferredSize.width;
                     }
@@ -829,8 +875,8 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
         };
         final Container contentPane = new JPanel() {
             /**
-            * 
-            */
+             *
+             */
             private static final long serialVersionUID = 1L;
 
             public Dimension getPreferredSize() {
@@ -888,8 +934,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
      * Create a tool bar.  This reads the definition of a tool bar
      * from the associated resource file.
      *
-     * @param nm  the name of the tool bar definition in the resource file
-     *
+     * @param nm the name of the tool bar definition in the resource file
      * @return the created tool bar
      */
     JToolBar createToolBar(final String nm) {
@@ -917,14 +962,12 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
             final FontFamilyPicker fontFamily = new FontFamilyPicker();
             fontFamily.setAction(dynRes.getAction(fontFamilyAction));
             toolBar.add(fontFamily);
-        }
-        else if (itemKey.equalsIgnoreCase(fontSizeAction)) {
+        } else if (itemKey.equalsIgnoreCase(fontSizeAction)) {
             final FontSizePicker fontSize = new FontSizePicker();
             fontSize.setPrototypeDisplayValue("88888");
             fontSize.setAction(dynRes.getAction(fontSizeAction));
             toolBar.add(fontSize);
-        }
-        else if (itemKey.equalsIgnoreCase(setTagAction)) {
+        } else if (itemKey.equalsIgnoreCase(setTagAction)) {
             tagSelector = new TagSelector();
             tagSelector.setAction(dynRes.getAction(setTagAction));
             /*
@@ -935,19 +978,17 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
              jtpDocs.addChangeListener(styleSelector);
              */
             toolBar.add(tagSelector);
-        }
-        else {
+        } else {
             AbstractButton newButton;
             try {
                 if (itemKey.equalsIgnoreCase(helpTopicsAction)) {
                     newButton = SHTMLHelpBroker.createHelpButton("item15");
                     final Icon icon = DynamicResource
-                        .getIconForCommand(SHTMLPanelImpl.getUiResources(), helpTopicsAction);
+                            .getIconForCommand(SHTMLPanelImpl.getUiResources(), helpTopicsAction);
                     newButton.setIcon(icon);
                     newButton.setToolTipText(Util.getResourceString(helpTopicsAction + DynamicResource.toolTipSuffix));
                     toolBar.add(newButton);
-                }
-                else {
+                } else {
                     /**
                      * special handling for JToggleButtons in the tool bar
                      */
@@ -971,10 +1012,8 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
                     newButton.putClientProperty("JButton.buttonType", "segmented");
                     newButton.putClientProperty("JButton.segmentPosition", "middle");
                 }
-            }
-            catch (final Exception ex) {
-            }
-            catch (final java.lang.NoClassDefFoundError e) {
+            } catch (final Exception ex) {
+            } catch (final java.lang.NoClassDefFoundError e) {
             } //When one of the help components is not there
         }
     }
@@ -992,7 +1031,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
     /**
      * remove FrmMain as a registered object from a given
      * document pane and its components
-     *
+     * <p>
      * remove all plug-ins owned by this FrmMain from
      * SimplyHTML objects too
      */
@@ -1008,28 +1047,27 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
 
     /**
      * save a document and catch possible errors
-     *
+     * <p>
      * this is shared by save and saveAs so we put it here to avoid redundancy
      *
-     * @param documentPane  the document pane containing the document to save
-     * @param target 
+     * @param documentPane the document pane containing the document to save
+     * @param target
      */
     void doSave(final DocumentPane documentPane, URL target) {
-    try {
-      documentPane.saveDocument(target);
+        try {
+            documentPane.saveDocument(target);
+        }
+        /**
+         * this exception should never happen as the menu allows to save a
+         * document only if a name has been set. For new documents, whose
+         * name is not set, only save as is enabled anyway.
+         *
+         * Just in case this is changed without remembering why it was designed
+         * that way, we catch the exception here.
+         */ catch (DocNameMissingException e) {
+            Util.errMsg(this, Util.getResourceString(getUiResources(), "docNameMissingError"), e);
+        }
     }
-    /**
-     * this exception should never happen as the menu allows to save a
-     * document only if a name has been set. For new documents, whose
-     * name is not set, only save as is enabled anyway.
-     *
-     * Just in case this is changed without remembering why it was designed
-     * that way, we catch the exception here.
-     */
-    catch(DocNameMissingException e) {
-      Util.errMsg(this, Util.getResourceString(getUiResources(), "docNameMissingError"), e);
-    }
-  }
 
     public boolean isWYSIWYGEditorActive() {
         return getDocumentPane() != null && editorPane != null && getDocumentPane().getSelectedTab() == DocumentPane.VIEW_TAB_LAYOUT;
@@ -1043,7 +1081,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
      * get action properties from the associated resource bundle
      *
      * @param action the action to apply properties to
-     * @param cmd the name of the action to get properties for
+     * @param cmd    the name of the action to get properties for
      */
     public static void configureActionProperties(final Action action, final String cmd) {
         final String name = Util.getResourceString(getUiResources(), cmd + DynamicResource.labelSuffix);
@@ -1058,7 +1096,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
         if (toolTip != null) {
             action.putValue(Action.SHORT_DESCRIPTION, toolTip);
         }
-        
+
         final String accelerator = Util.getResourceString(getUiResources(), cmd + DynamicResource.acceleratorSuffix);
         if (accelerator != null) {
             action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(accelerator));
@@ -1066,12 +1104,18 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
     }
 
     /* ---------- undo/redo implementation ----------------------- */
-    /** Listener for edits on a document. */
+    /**
+     * Listener for edits on a document.
+     */
     private final UndoableEditListener undoHandler = new UndoHandler();
-    /** UndoManager that we add edits to. */
+    /**
+     * UndoManager that we add edits to.
+     */
     private UndoManager undo = new UndoManager();
 
-    /** inner class for handling undoable edit events */
+    /**
+     * inner class for handling undoable edit events
+     */
     class UndoHandler implements UndoableEditListener {
         /**
          * Messaged when the Document has created an edit, the edit is
@@ -1131,12 +1175,10 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
                         ((AttributeComponent) c).setValue(a);
                         ssa.setIgnoreActions(false);
                     }
-                }
-                else {
+                } else {
                     ((AttributeComponent) c).setValue(a);
                 }
-            }
-            else if (c instanceof AbstractButton) {
+            } else if (c instanceof AbstractButton) {
                 action = ((AbstractButton) c).getAction();
                 if ((action != null) && (action instanceof AttributeComponent)) {
                     ((AttributeComponent) action).setValue(a);
@@ -1146,11 +1188,13 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
     }
 
     /**
-    * a JComboBox for selecting a font family names
-    * from those available in the system.
-    */
+     * a JComboBox for selecting a font family names
+     * from those available in the system.
+     */
     class FontFamilyPicker extends JComboBox implements AttributeComponent {
-        /** switch for the action listener */
+        /**
+         * switch for the action listener
+         */
         private boolean ignoreActions = false;
 
         FontFamilyPicker() {
@@ -1169,11 +1213,10 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
         /**
          * set the value of this <code>AttributeComponent</code>
          *
-         * @param a  the set of attributes possibly having an
+         * @param a the set of attributes possibly having an
          *          attribute this component can display
-         *
          * @return true, if the set of attributes had a matching attribute,
-         *            false if not
+         * false if not
          */
         public boolean setValue(final AttributeSet a) {
             ignoreActions = true;
@@ -1201,9 +1244,9 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
     }
 
     /**
-    * a JComboBox for selecting a font size
-    */
-    static final String[] FONT_SIZES = new String[] { "8", "10", "12", "14", "18", "24" };
+     * a JComboBox for selecting a font size
+     */
+    static final String[] FONT_SIZES = new String[]{"8", "10", "12", "14", "18", "24"};
 
     class FontSizePicker extends JComboBox implements AttributeComponent {
         private boolean ignoreActions = false;
@@ -1224,11 +1267,10 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
         /**
          * set the value of this combo box
          *
-         * @param a  the set of attributes possibly having a
+         * @param a the set of attributes possibly having a
          *          font size attribute this pick list could display
-         *
          * @return true, if the set of attributes had a font size attribute,
-         *            false if not
+         * false if not
          */
         public boolean setValue(final AttributeSet a) {
             ignoreActions = true;
@@ -1276,8 +1318,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
                 //System.out.println("propertyName=" + propertyName + " newValue=" + e.getNewValue());
                 if (e.getNewValue().toString().equals(SHTMLPanelImpl.ACTION_SELECTED)) {
                     button.setSelected(true);
-                }
-                else {
+                } else {
                     button.setSelected(false);
                 }
             }
@@ -1296,8 +1337,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
      * at the current position in the document. Combine element
      * attributes with attributes from the style sheet.
      *
-     * @param editorPane  the editor pane to combine attributes from
-     *
+     * @param editorPane the editor pane to combine attributes from
      * @return the resulting set of combined attributes
      */
     AttributeSet getMaxAttributes(final SHTMLEditorPane editorPane, final String elemName) {
@@ -1308,7 +1348,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
             return SHTMLPanelImpl.getMaxAttributes(element, styleSheet);
         }
         final MutableAttributeSet maxAttributes = (MutableAttributeSet) SHTMLPanelImpl.getMaxAttributes(element,
-            styleSheet);
+                styleSheet);
         final StyledEditorKit editorKit = (StyledEditorKit) editorPane.getEditorKit();
         final MutableAttributeSet inputAttributes = editorKit.getInputAttributes();
         maxAttributes.addAttributes(inputAttributes);
@@ -1344,8 +1384,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
             attrs = s.getStyle(styleName);
             if (attrs != null) {
                 a.addAttributes(Util.resolveAttributes(attrs));
-            }
-            else {
+            } else {
                 attrs = s.getStyle(elemName);
                 if (attrs != null) {
                     a.addAttributes(Util.resolveAttributes(attrs));

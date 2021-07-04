@@ -50,7 +50,7 @@ import javax.swing.border.EmptyBorder;
  *      for details see file gpl.txt in the distribution
  *      package of this software
  *
- * 
+ *
  */
 class SplitPanel extends JPanel {
     /* --------------- class fields start --------------- */
@@ -77,7 +77,7 @@ class SplitPanel extends JPanel {
     /**
      * Constructor
      */
-    public SplitPanel() {
+    public SplitPanel(boolean isComponent) {
         super();
         setLayout(new BorderLayout());
         final int[] directions = new int[] { NORTH, EAST, SOUTH, WEST };
@@ -86,6 +86,9 @@ class SplitPanel extends JPanel {
             outerPanels[directions[i]] = new JSplitPane();
             outerPanels[directions[i]].setBorder(new EmptyBorder(0, 0, 0, 0));
             outerPanels[directions[i]].setContinuousLayout(true);
+            if (isComponent){
+                outerPanels[directions[i]].setDividerSize(0);
+            }
         }
         buildLayout();
         restorePrefs();

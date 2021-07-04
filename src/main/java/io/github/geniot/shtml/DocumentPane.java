@@ -18,28 +18,7 @@
  */
 package io.github.geniot.shtml;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.StringWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Enumeration;
-import java.util.EventObject;
-import java.util.Vector;
-
-import javax.swing.JComponent;
-import javax.swing.JEditorPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -47,6 +26,13 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.StyleSheet;
+import java.awt.*;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.EventObject;
+import java.util.Vector;
 
 /**
  * GUI representation of a document.
@@ -92,6 +78,8 @@ public class DocumentPane extends JPanel implements DocumentListener, ChangeList
     public boolean saveSuccessful = false;
     /** indicates if the document text has changed */
     private boolean documentChanged = false;
+    /** in Simple Mode we do not need to save the document to a temporary file */
+    private boolean isComponent = false;
 
     /**
      * @param documentChanged The documentChanged to set.
@@ -152,6 +140,7 @@ public class DocumentPane extends JPanel implements DocumentListener, ChangeList
      */
     public DocumentPane(boolean isComponent/*int renderMode*/) {
         super();
+        this.isComponent = isComponent;
         // EditorPane and ScrollPane for layout view
         editorPane = new SHTMLEditorPane();
         richViewScrollPane = new JScrollPane(); // create a new JScrollPane,
@@ -250,12 +239,15 @@ public class DocumentPane extends JPanel implements DocumentListener, ChangeList
             //insertStyleRef(doc); // create style sheet reference in HTML header tag
             //styles = kit.getStyleSheet();
             doc.addDocumentListener(this); // listen to changes
-            docTempDir = new File(SHTMLPanelImpl.getAppTempDir().getAbsolutePath() + File.separator + getDocumentName()
-            + File.separator);
-            URL tempDocumentUrl = new URL(docTempDir.toURL(), getDocumentName() + ".htm");
-            doc.setBase(tempDocumentUrl);
+            if (!isComponent) {
+                docTempDir = new File(SHTMLPanelImpl.getAppTempDir().getAbsolutePath() + File.separator + getDocumentName() + File.separator);
+                URL tempDocumentUrl = new URL(docTempDir.toURL(), getDocumentName() + ".htm");
+                doc.setBase(tempDocumentUrl);
+            }
             editorPane.setDocument(doc); // let the document be edited in our editor
-            updateFileName();
+            if (!isComponent){
+                updateFileName();
+            }
             //doc.putProperty(Document.TitleProperty, getDocumentName());
             final boolean useStyle = Util.useSteStyleSheet();
             if (useStyle) {
