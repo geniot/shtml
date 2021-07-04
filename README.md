@@ -1,12 +1,23 @@
-SimplyHTML readme file
-Stage 13, May 24th, 2009
+# About
+Forked from: https://github.com/freeplane/shtml
 
-Copyright (c) 2002, 2003 Ulrich Hilger, 2008 Dimitri Polivaev 
-http://simplyhtml.sf.net/
-(see 'License' below)
+Also take a look at: https://sourceforge.net/projects/simplyhtml/
 
-This file contains
-------------------
+# Differences
+
+* Mavenized source code
+* Added simple mode
+
+How to use Simple Mode:
+https://github.com/geniot/shtml/blob/master/src/test/java/io/github/geniot/shtmltest/ShtmlPanelTest.java
+
+Basically I modified shtml constructors to accept `boolean isComponent`.
+
+The result is a bare editor:
+
+![Simple Mode](screenshots/simple_mode.png)
+
+# This file contains
 
   About SimplyHTML
   Downloads
@@ -16,8 +27,7 @@ This file contains
   Compilation
   License
 
-About SimplyHTML
-----------------
+# About SimplyHTML
 
   SimplyHTML is an application for text processing. It
   stores documents as HTML files in combination with
@@ -29,8 +39,14 @@ About SimplyHTML
   simple and generic way of storing textual information
   and styles.
 
-Downloads
----------
+SimplyHTML readme file
+Stage 13, May 24th, 2009
+
+Copyright (c) 2002, 2003 Ulrich Hilger, 2008 Dimitri Polivaev
+http://simplyhtml.sf.net/
+(see 'License' below)
+
+# Downloads
 
 The SimplyHTML offers 3 packages you can download:
 	- SimplyHTML_bin_<Version>.zip - this is the one you need!
@@ -40,8 +56,7 @@ The SimplyHTML offers 3 packages you can download:
 	- SimplyHTML_src_<Version>.tar.gz - the source code, if you don't
 	  know what it is, you don't need it!
 
-Requirements
-------------
+# Requirements
 
   To use SimplyHTML, you will need to have a Java JRE
   (Java Runtime Environment) installed, with a version equal or
@@ -53,8 +68,7 @@ Requirements
 
   J2SE and/or JRE can be obtained at http://java.sun.com/javase/downloads/
 
-Installation
-------------
+# Installation
 
   Once you've downloaded the 'bin' and possibly the 'manual' zip
   files, extract them (keeping the directory structure) into a directory
@@ -71,8 +85,7 @@ Note:
 
       http://www.calcom.de/eng/product/xtract.htm
 
-Usage
------
+# Usage
   
   Starting SimplyHTML can be as easy as double-clicking on the
   file "<SimplyHTMLDir>/lib/SimplyHTML.jar".
@@ -85,8 +98,7 @@ Usage
   If you've downloaded the manual, you can see it in your browser by
   just pointing it to "<SimplyHTMLDir>/manual/index.htm".
 
-Compilation
------------
+# Compilation
 
   If you'd like to compile SimplyHTML yourself, we would assume that you
   know what you're doing, hence only the highlights:
@@ -96,8 +108,7 @@ Compilation
   - the call of 'ant' within the 'src' sub-directory should then create
     everything you need one level above.
 
-License
--------
+# License
 
   This distribution of SimplyHTML is published under the terms
   and conditions of the GNU General Public License. To read the
