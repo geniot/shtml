@@ -34,6 +34,12 @@
             <version>1.1.4</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.freeplane.dpolivaev.mnemonicsetter</groupId>
+            <artifactId>mnemonicsetter</artifactId>
+            <version>0.6</version>
+        </dependency>
+
     </dependencies>
 
 
