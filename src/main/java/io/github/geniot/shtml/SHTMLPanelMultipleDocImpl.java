@@ -72,7 +72,7 @@ class SHTMLPanelMultipleDocImpl extends SHTMLPanelImpl implements ChangeListener
      */
     protected void customizeFrame() {
         jtpDocs = new JTabbedPane();
-        super.customizeFrame();
+        super.customizeFrame(false);
         jtpDocs.addChangeListener(this);
         splitPanel.addComponent(jtpDocs, SplitPanel.CENTER);
     }
@@ -163,7 +163,7 @@ class SHTMLPanelMultipleDocImpl extends SHTMLPanelImpl implements ChangeListener
     }
 
     void createNewDocumentPane() {
-        setDocumentPane(new DocumentPane(null, ++newDocCounter));
+        setDocumentPane(new DocumentPane(null, ++newDocCounter, false));
     }
 
     void selectTabbedPane(final int index) {

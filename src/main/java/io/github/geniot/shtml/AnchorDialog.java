@@ -166,14 +166,14 @@ class AnchorDialog extends DialogShell implements ActionListener, CaretListener,
         // init DocumentPane
         if (doc != null) {
             needsSaving = false;
-            dp = new DocumentPane(/*renderMode*/);
+            dp = new DocumentPane(false/*renderMode*/);
             doc.addDocumentListener(this);
             dp.setDocument(doc);
             this.doc = doc;
         }
         else {
             needsSaving = true;
-            dp = new DocumentPane(url, 1/*, renderMode*/);
+            dp = new DocumentPane(url, 1, false/*, renderMode*/);
             this.doc = dp.getDocument();
         }
         // init editor to our needs

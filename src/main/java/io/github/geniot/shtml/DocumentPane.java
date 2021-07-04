@@ -150,7 +150,7 @@ public class DocumentPane extends JPanel implements DocumentListener, ChangeList
      * this constructor, so it is better to use the constructor doing this
      * right away instead.</p>
      */
-    public DocumentPane(/*int renderMode*/) {
+    public DocumentPane(boolean isComponent/*int renderMode*/) {
         super();
         // EditorPane and ScrollPane for layout view
         editorPane = new SHTMLEditorPane();
@@ -163,7 +163,7 @@ public class DocumentPane extends JPanel implements DocumentListener, ChangeList
         sourceViewScrollPane = new JScrollPane();
         sourceViewScrollPane.getViewport().setView(sourceEditorPane);
         // Tabbed pane for HTML and layout views
-        if (Util.showViewsInTabs()) {
+        if (!isComponent && Util.showViewsInTabs()) {
             paneHoldingScrollPanes = new JTabbedPane();
             paneHoldingScrollPanes.add(richViewScrollPane, VIEW_TAB_LAYOUT);
             paneHoldingScrollPanes.add(sourceViewScrollPane, VIEW_TAB_HTML);
@@ -200,8 +200,8 @@ public class DocumentPane extends JPanel implements DocumentListener, ChangeList
      * title as long as it is not saved (such as in 'Untitled1'). If an
      * existing document shall be loaded, this number is ignored
      */
-    public DocumentPane(final URL docToLoad, final int newDocNo/*, int renderMode*/) {
-        this(/*renderMode*/);
+    public DocumentPane(final URL docToLoad, final int newDocNo, boolean isComponent/*, int renderMode*/) {
+        this(isComponent/*renderMode*/);
         DEFAULT_DOC_NAME = Util.getResourceString("defaultDocName");
         if (docToLoad != null) {
             loadDocument(docToLoad);

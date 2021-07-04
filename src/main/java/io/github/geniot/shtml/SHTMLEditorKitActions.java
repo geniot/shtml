@@ -2622,7 +2622,7 @@ class SHTMLEditorKitActions {
             public void run() {
                 try {
                     JOptionPane.getFrameForComponent(panel);
-                    panel.setDocumentPane(new DocumentPane(file.toURL(), 0/*, renderMode*/));
+                    panel.setDocumentPane(new DocumentPane(file.toURL(), 0, false/*, renderMode*/));
                     if (l != null) {
                         panel.getDocumentPane().addDocumentPaneListener(l);
                     }

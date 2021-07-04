@@ -27,9 +27,9 @@ public class SHTMLPanelSingleDocImpl extends SHTMLPanelImpl {
     /* (non-Javadoc)
      * @see com.lightdev.app.shtm.SHTMLPanelImpl#initDocumentPane()
      */
-    protected void initDocumentPane() {
-        super.initDocumentPane();
-        setDocumentPane(new DocumentPane(null, 1));
+    protected void initDocumentPane(boolean isComponent) {
+        super.initDocumentPane(isComponent);
+        setDocumentPane(new DocumentPane(null, 1, isComponent));
         setEditorPane(getDocumentPane().getEditor());
         doc = (SHTMLDocument) getEditorPane().getDocument();
         registerDocument();

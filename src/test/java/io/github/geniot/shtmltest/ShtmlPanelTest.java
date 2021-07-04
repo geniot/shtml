@@ -27,9 +27,16 @@ public class ShtmlPanelTest {
 
     public static void main(String[] args) {
         JFrame frame = new JFrame();
-        frame.getContentPane().add(new MyTestPanel(), BorderLayout.CENTER);
+        MyTestPanel myTestPanel = new MyTestPanel();
+        frame.getContentPane().add(myTestPanel, BorderLayout.CENTER);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                myTestPanel.getEditorPane().requestFocus();
+            }
+        });
         frame.setVisible(true);
     }
 

@@ -134,7 +134,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
     private final RepeatKeyWatcher rkw = new RepeatKeyWatcher(40);
     /** counter for newly created documents */
     int newDocCounter = 0;
-    /** reference to applicatin temp directory */
+    /** reference to application temp directory */
     private static File appTempDir;
 	private static ActionBuilder actionBuilder;
     /** tool bar selector for certain tags */
@@ -253,10 +253,10 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
             editorPopup = dynRes.createPopupMenu(getUiResources(), "popup");
             setJMenuBar(menuBar);
         }
-        customizeFrame();
+        customizeFrame(isComponent);
         initAppTempDir();
         initPlugins();
-        initDocumentPane();
+        initDocumentPane(isComponent);
         updateActions();
         if (!isComponent) {
             initJavaHelp();
@@ -671,7 +671,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
         }
     }
 
-    protected void initDocumentPane() {
+    protected void initDocumentPane(boolean isComponent) {
         //TODO
     }
 
@@ -784,8 +784,8 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
     }
 
     /** customize the frame to our needs */
-    protected void customizeFrame() {
-        if (Util.getPreference(SHOW_MENU_PROPERTY, "true").equalsIgnoreCase("false")) {
+    protected void customizeFrame(boolean isComponent) {
+        if (isComponent || Util.getPreference(SHOW_MENU_PROPERTY, "true").equalsIgnoreCase("false")) {
             menuBar.setVisible(false);
         }
         splitPanel = new SplitPanel();
@@ -846,7 +846,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
         toolBarPanel.add(formatToolBar);
         toolBarPanel.add(paraToolBar);
         contentPane.add(toolBarPanel, BorderLayout.NORTH);
-        if (Util.getPreference(SHOW_TOOLBARS_PROPERTY, "true").equalsIgnoreCase("false")) {
+        if (isComponent || Util.getPreference(SHOW_TOOLBARS_PROPERTY, "true").equalsIgnoreCase("false")) {
             toolBarPanel.setVisible(false);
         }
         //contentPane.add(workPanel, BorderLayout.CENTER);
