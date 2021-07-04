@@ -4,6 +4,7 @@ package io.github.geniot.shtmltest;
 import io.github.geniot.shtml.SHTMLPanelSingleDocImpl;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
@@ -24,11 +25,17 @@ public class ShtmlPanelTest {
             "/* http://www.w3schools.com/cssref/css_colors.asp */\n" +
             "}</style></head><body>";
     public static final String HTML_DOC_END = "</body></html>";
+    public static String text = "<p>Some text</p>";
 
     public static void main(String[] args) {
         JFrame frame = new JFrame();
         MyTestPanel myTestPanel = new MyTestPanel();
+//        JEditorPane editorPane = new JEditorPane();
+//        editorPane.setContentType("text/html");
+//        editorPane.setBorder(new EmptyBorder(0,0,0,0));
+//        editorPane.setText(HTML_DOC_START + text + HTML_DOC_END);
         frame.getContentPane().add(myTestPanel, BorderLayout.CENTER);
+//        frame.getContentPane().add(editorPane, BorderLayout.CENTER);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         SwingUtilities.invokeLater(new Runnable() {
@@ -43,7 +50,10 @@ public class ShtmlPanelTest {
     static class MyTestPanel extends SHTMLPanelSingleDocImpl {
         public MyTestPanel() {
             super(true);
-            String text = "<p>Some text</p>";
+            getDocumentPane().getEditor().setBorder(new EmptyBorder(0,0,0,0));
+            JViewport viewport = (JViewport) getDocumentPane().getEditor().getParent();
+            JScrollPane scrollPane = (JScrollPane) viewport.getParent();
+            scrollPane.setBorder(new EmptyBorder(0,0,0,0));
             getDocumentPane().setDocumentText(HTML_DOC_START + text + HTML_DOC_END);
             getDocument().addDocumentListener(new DocumentListener() {
                 @Override

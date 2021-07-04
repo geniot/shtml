@@ -1,12 +1,3 @@
-/dist
-/bin
-/build
-/.gradle
-/.project
-/.classpath
-/.settings
-/gradle
-/gradlew
-/gradlew.bat
 .idea
 target
+*.iml
