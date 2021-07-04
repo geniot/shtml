@@ -3,6 +3,14 @@ Forked from: https://github.com/freeplane/shtml
 
 Also take a look at: https://sourceforge.net/projects/simplyhtml/
 
+# Maven
+
+        <dependency>
+            <groupId>io.github.geniot</groupId>
+            <artifactId>shtml</artifactId>
+            <version>1.0</version>
+        </dependency>
+
 # Differences
 
 * Mavenized source code
@@ -19,13 +27,13 @@ The result is a bare editor:
 
 # This file contains
 
-  About SimplyHTML
-  Downloads
-  Requirements
-  Installation
-  Usage
-  Compilation
-  License
+- About SimplyHTML
+- Downloads
+- Requirements
+- Installation
+- Usage
+- Compilation
+- License
 
 # About SimplyHTML
 
