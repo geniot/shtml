@@ -2459,7 +2459,7 @@ class SHTMLEditorKitActions {
      * <li>documents are open and are saved successfully prior to close or </li>
      * <li>documents are open for which the user explicitly opted not
      *        to save them </li>
-     * </ul></p>
+     * </ul>
      */
     static class SHTMLFileExitAction extends AbstractAction implements SHTMLAction {
         /**

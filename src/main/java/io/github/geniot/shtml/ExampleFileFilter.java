@@ -57,7 +57,7 @@ import javax.swing.filechooser.FileFilter;
  *
  *     JFileChooser chooser = new JFileChooser();
  *     ExampleFileFilter filter = new ExampleFileFilter(
- *                   new String{"gif", "jpg"}, "JPEG & GIF Images")
+ *                   new String{"gif", "jpg"}, "JPEG &amp; GIF Images")
  *     chooser.addChoosableFileFilter(filter);
  *     chooser.showOpenDialog(this);
  *
@@ -150,7 +150,7 @@ public class ExampleFileFilter extends FileFilter {
      * Files that begin with "." are ignored.
      *
      * @see #getExtension
-     * @see FileFilter#accepts
+     * @see FileFilter
      */
     public boolean accept(final File f) {
         if (f != null) {
@@ -206,9 +206,6 @@ public class ExampleFileFilter extends FileFilter {
      * Returns the human readable description of this filter. For
      * example: "JPEG and GIF Image Files (*.jpg, *.gif)"
      *
-     * @see setDescription
-     * @see setExtensionListInDescription
-     * @see isExtensionListInDescription
      * @see FileFilter#getDescription
      */
     public String getDescription() {
@@ -236,9 +233,6 @@ public class ExampleFileFilter extends FileFilter {
      * Sets the human readable description of this filter. For
      * example: filter.setDescription("Gif and JPG Images");
      *
-     * @see setDescription
-     * @see setExtensionListInDescription
-     * @see isExtensionListInDescription
      */
     public void setDescription(final String description) {
         this.description = description;
@@ -252,9 +246,6 @@ public class ExampleFileFilter extends FileFilter {
      * Only relevent if a description was provided in the constructor
      * or using setDescription();
      *
-     * @see getDescription
-     * @see setDescription
-     * @see isExtensionListInDescription
      */
     public void setExtensionListInDescription(final boolean b) {
         useExtensionsInDescription = b;
@@ -268,9 +259,6 @@ public class ExampleFileFilter extends FileFilter {
      * Only relevent if a description was provided in the constructor
      * or using setDescription();
      *
-     * @see getDescription
-     * @see setDescription
-     * @see setExtensionListInDescription
      */
     public boolean isExtensionListInDescription() {
         return useExtensionsInDescription;

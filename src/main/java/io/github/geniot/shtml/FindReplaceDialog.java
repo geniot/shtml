@@ -109,7 +109,6 @@ import io.github.geniot.shtml.PseudoDamerauLevenshtein.Alignment;
  *     }
  *   }
  * </pre>
- * </p>
  *
  * <p>Added i18n support for application SimplyHTML in version 1.5</p>
  *

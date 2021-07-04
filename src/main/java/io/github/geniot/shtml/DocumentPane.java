@@ -276,7 +276,6 @@ public class DocumentPane extends JPanel implements DocumentListener, ChangeList
 
     /**
      * remove the temporary storage created for this <code>DocumentPane</code>
-     * @param docTempDir 
      */
     public void deleteTempDir() {
         if (docTempDir != null) {

@@ -34,11 +34,11 @@ import java.util.Stack;
  * Optionally the edit distance of a semi-global alignment is computed which
  * allows the search term to be shifted free-of-cost (i.e. dist("file", "a file is")==0).
  * 
- * Some properties are explained in the unit test, {@link org.freeplane.features.filter.EditDistanceStringMatchingStrategiesTest}.
+ * Some properties are explained in the unit test.
  * 
  * TODO: use unicode code points instead of chars !!
  * 
- * @author Felix Natter <fnatter@gmx.net>
+ * @author Felix Natter fnatter@gmx.net
  *
  */
 public class PseudoDamerauLevenshtein {

@@ -450,8 +450,8 @@ public class ElementTreePanel extends JPanel implements CaretListener, DocumentL
          * the parent's child array.  <I>parent</I> must be a node
          * previously obtained from this data source. This should
          * not return null if <i>index</i> is a valid index for
-         * <i>parent</i> (that is <i>index</i> >= 0 && <i>index</i>
-         * < getChildCount(<i>parent</i>)).
+         * <i>parent</i> (that is <i>index</i> &gt;= 0 &amp;&amp; <i>index</i>
+         * &lt; getChildCount(<i>parent</i>)).
          *
          * @param   parent  a node in the tree, obtained from this data source
          * @return  the child of <I>parent</I> at index <I>index</I>
