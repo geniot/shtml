@@ -31,6 +31,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.prefs.Preferences;
 import java.util.stream.Stream;
 
 import javax.swing.event.DocumentEvent;
@@ -778,7 +779,8 @@ public class SHTMLDocument extends HTMLDocument {
     }
 
     public File getImageDirectory() {
-        return SHTMLDocument.getImageDirectory(getBase());
+        String prefsDir = Preferences.userRoot().get(ImageDialog.PREF_IMG_DIR, null);
+        return prefsDir == null ? SHTMLDocument.getImageDirectory(getBase()) : new File(prefsDir);
     }
     
     public static File getImageDirectory(URL base) {
@@ -790,7 +792,8 @@ public class SHTMLDocument extends HTMLDocument {
     }
 
     public String getImageDirectoryName() {
-        return SHTMLDocument.getImageDirectoryName(getBase());
+        return getImageDirectory().getAbsolutePath();
+//        return SHTMLDocument.getImageDirectoryName(getBase());
     }
 
     public static String getImageDirectoryName(URL documentUrl) {

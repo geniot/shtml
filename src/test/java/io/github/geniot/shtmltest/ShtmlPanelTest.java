@@ -1,6 +1,7 @@
 package io.github.geniot.shtmltest;
 
 
+import io.github.geniot.shtml.ImageDialog;
 import io.github.geniot.shtml.SHTMLPanelSingleDocImpl;
 
 import javax.swing.*;
@@ -8,6 +9,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.util.prefs.Preferences;
 
 /**
  * No unit tests here. Just an editor test to make sure shtml can be initialized the way that I want it.
@@ -38,6 +40,7 @@ public class ShtmlPanelTest {
 //        frame.getContentPane().add(editorPane, BorderLayout.CENTER);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
+        Preferences.userRoot().put(ImageDialog.PREF_IMG_DIR, "");
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -49,11 +52,11 @@ public class ShtmlPanelTest {
 
     static class MyTestPanel extends SHTMLPanelSingleDocImpl {
         public MyTestPanel() {
-            super(true);
-            getDocumentPane().getEditor().setBorder(new EmptyBorder(0,0,0,0));
+            super(true, true, false, true);
+            getDocumentPane().getEditor().setBorder(new EmptyBorder(0, 0, 0, 0));
             JViewport viewport = (JViewport) getDocumentPane().getEditor().getParent();
             JScrollPane scrollPane = (JScrollPane) viewport.getParent();
-            scrollPane.setBorder(new EmptyBorder(0,0,0,0));
+            scrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
             getDocumentPane().setDocumentText(HTML_DOC_START + text + HTML_DOC_END);
             getDocument().addDocumentListener(new DocumentListener() {
                 @Override

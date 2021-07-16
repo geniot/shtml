@@ -20,8 +20,8 @@
 package io.github.geniot.shtml;
 
 public class SHTMLPanelSingleDocImpl extends SHTMLPanelImpl {
-    public SHTMLPanelSingleDocImpl(boolean isComponent) {
-        super(isComponent);
+    public SHTMLPanelSingleDocImpl(boolean isComponent, boolean showContextMenu, boolean showMenuBar, boolean showToolbar) {
+        super(isComponent, showContextMenu, showMenuBar, showToolbar);
     }
 
     /* (non-Javadoc)

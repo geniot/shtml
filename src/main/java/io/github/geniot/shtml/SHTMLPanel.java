@@ -60,7 +60,7 @@ public abstract class SHTMLPanel extends JPanel implements SHTMLPrefsChangeListe
     }
 
     public static SHTMLPanel createSHTMLPanel() {
-        return new SHTMLPanelSingleDocImpl(false);
+        return new SHTMLPanelSingleDocImpl(false, true, true, true);
     }
 
     public abstract String getDocumentText();

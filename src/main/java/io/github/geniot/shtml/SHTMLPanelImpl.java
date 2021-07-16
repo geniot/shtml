@@ -42,6 +42,7 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.*;
+import java.util.List;
 import java.util.prefs.Preferences;
 
 /**
@@ -121,7 +122,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
         }
     }
 
-    private final SHTMLMenuBar menuBar;
+    private SHTMLMenuBar menuBar;
     /**
      * currently active DocumentPane
      */
@@ -180,7 +181,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
      * indicates, whether document activation shall be handled
      */
     boolean ignoreActivateDoc = false;
-    private final JPopupMenu editorPopup;
+    private JPopupMenu editorPopup;
     /**
      * action names
      * <p>
@@ -275,7 +276,7 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
     /**
      * construct a new main application frame
      */
-    SHTMLPanelImpl(boolean isComponent) {
+    SHTMLPanelImpl(boolean isComponent, boolean showContextMenu, boolean showMenuBar, boolean showToolbar) {
         super(new BorderLayout());
         if (!isComponent) {
             SplashScreen.showInstance();
@@ -285,14 +286,14 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
         if (actionBuilder != null) {
             actionBuilder.initActions(this);
         }
-        menuBar = dynRes.createMenubar(uiResources, "menubar");
-        if (isComponent) {
-            editorPopup = null;
-        } else {
+        if (showContextMenu){
             editorPopup = dynRes.createPopupMenu(getUiResources(), "popup");
-            setJMenuBar(menuBar);
         }
-        customizeFrame(isComponent);
+        menuBar = dynRes.createMenubar(uiResources, "menubar");
+        setJMenuBar(menuBar);
+
+        customizeFrame(isComponent, showMenuBar, showToolbar);
+
         if (!isComponent) {
             initAppTempDir();
             initPlugins();
@@ -832,8 +833,8 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
     /**
      * customize the frame to our needs
      */
-    protected void customizeFrame(boolean isComponent) {
-        if (isComponent || Util.getPreference(SHOW_MENU_PROPERTY, "true").equalsIgnoreCase("false")) {
+    protected void customizeFrame(boolean isComponent, boolean showMenuBar, boolean showToolbar) {
+        if (!showMenuBar || Util.getPreference(SHOW_MENU_PROPERTY, "true").equalsIgnoreCase("false")) {
             menuBar.setVisible(false);
         }
         splitPanel = new SplitPanel(isComponent);
@@ -886,13 +887,13 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
             }
         };
         contentPane.setLayout(new BorderLayout());
-        toolBarPanel.add(createToolBar("toolBar"));
-        formatToolBar = createToolBar("formatToolBar");
-        paraToolBar = createToolBar("paraToolBar");
+        toolBarPanel.add(createToolBar("toolBar", isComponent));
+        formatToolBar = createToolBar("formatToolBar", isComponent);
+        paraToolBar = createToolBar("paraToolBar", isComponent);
         toolBarPanel.add(formatToolBar);
         toolBarPanel.add(paraToolBar);
         contentPane.add(toolBarPanel, BorderLayout.NORTH);
-        if (isComponent || Util.getPreference(SHOW_TOOLBARS_PROPERTY, "true").equalsIgnoreCase("false")) {
+        if (!showToolbar || Util.getPreference(SHOW_TOOLBARS_PROPERTY, "true").equalsIgnoreCase("false")) {
             toolBarPanel.setVisible(false);
         }
         //contentPane.add(workPanel, BorderLayout.CENTER);
@@ -937,8 +938,16 @@ public class SHTMLPanelImpl extends SHTMLPanel implements CaretListener {
      * @param nm the name of the tool bar definition in the resource file
      * @return the created tool bar
      */
-    JToolBar createToolBar(final String nm) {
-        final String[] itemKeys = Util.tokenize(Util.getResourceString(getUiResources(), nm), " ");
+    JToolBar createToolBar(final String nm, boolean isComponent) {
+        String[] itemKeys = Util.tokenize(Util.getResourceString(getUiResources(), nm), " ");
+        if (isComponent && nm.equals("toolBar")){
+            itemKeys = Arrays.asList(itemKeys).subList(4, itemKeys.length).toArray(new String[itemKeys.length-4]);
+        }
+        if (isComponent && nm.equals("paraToolBar")){
+            List<String> itemsList = new ArrayList<>(Arrays.asList(itemKeys));
+            itemsList.remove(1);
+            itemKeys = itemsList.toArray(new String[itemsList.size()]);
+        }
         final JToolBar toolBar = new JToolBar();
         for (int i = 0; i < itemKeys.length; i++) {
             /** special handling for separators */

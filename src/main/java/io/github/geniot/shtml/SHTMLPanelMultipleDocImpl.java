@@ -27,7 +27,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.html.HTML;
 
-class SHTMLPanelMultipleDocImpl extends SHTMLPanelImpl implements ChangeListener {
+public class SHTMLPanelMultipleDocImpl extends SHTMLPanelImpl implements ChangeListener {
     public static final String newAction = "new";
     public static final String openAction = "open";
     public static final String closeAction = "close";
@@ -41,8 +41,8 @@ class SHTMLPanelMultipleDocImpl extends SHTMLPanelImpl implements ChangeListener
     /** number of currently active tab */
     private int activeTabNo;
 
-    public SHTMLPanelMultipleDocImpl() {
-        super(false);
+    public SHTMLPanelMultipleDocImpl(boolean isComponent, boolean showContextMenu, boolean showMenuBar, boolean showToolbar) {
+        super(isComponent, showContextMenu, showMenuBar, showToolbar);
     }
 
     protected void initDocumentPane(boolean isComponent) {
@@ -70,9 +70,9 @@ class SHTMLPanelMultipleDocImpl extends SHTMLPanelImpl implements ChangeListener
     /* (non-Javadoc)
      * @see com.lightdev.app.shtm.SHTMLPanelImpl#customizeFrame()
      */
-    protected void customizeFrame(boolean isComponent) {
+    protected void customizeFrame(boolean isComponent, boolean showMenuBar, boolean showToolbar) {
         jtpDocs = new JTabbedPane();
-        super.customizeFrame(isComponent);
+        super.customizeFrame(isComponent, showMenuBar, showToolbar);
         jtpDocs.addChangeListener(this);
         splitPanel.addComponent(jtpDocs, SplitPanel.CENTER);
     }

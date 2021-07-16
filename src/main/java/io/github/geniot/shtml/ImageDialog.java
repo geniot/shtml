@@ -35,6 +35,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.StringWriter;
 import java.util.Vector;
+import java.util.prefs.Preferences;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -65,16 +66,18 @@ import javax.swing.text.html.HTML;
  * @author <a href="http://www.lightdev.com">http://www.lightdev.com</a>
  * @author <a href="mailto:info@lightdev.com">info@lightdev.com</a>
  * @author published under the terms and conditions of the
- *      GNU General Public License,
- *      for details see file gpl.txt in the distribution
- *      package of this software
- *
- *
+ * GNU General Public License,
+ * for details see file gpl.txt in the distribution
+ * package of this software
  */
-class ImageDialog extends DialogShell implements ActionListener, ListSelectionListener, ChangeListener {
-    /** KeyListener for watching changes in the scale text field */
+public class ImageDialog extends DialogShell implements ActionListener, ListSelectionListener, ChangeListener {
+    /**
+     * KeyListener for watching changes in the scale text field
+     */
     private final KeyHandler keyHandler = new KeyHandler();
-    /** FocusListener for watching changes in the scale text field */
+    /**
+     * FocusListener for watching changes in the scale text field
+     */
     private final FocusHandler focusHandler = new FocusHandler();
     private final SimpleAttributeSet originalAttributes = new SimpleAttributeSet();
     /**
@@ -83,35 +86,61 @@ class ImageDialog extends DialogShell implements ActionListener, ListSelectionLi
      * class are to be ignored
      */
     private boolean ignoreChangeEvents = false;
-    /** list with images in this image repository */
+    /**
+     * list with images in this image repository
+     */
     private JList imgFileList;
-    /** button to add an image file to the repository */
+    /**
+     * button to add an image file to the repository
+     */
     private JButton addImgBtn;
-    /** button to delete an image file from the repository */
+    /**
+     * button to delete an image file from the repository
+     */
     private JButton delImgBtn;
-    /** text field for manipulating the scale of an image */
+    /**
+     * text field for manipulating the scale of an image
+     */
     private JTextField scale;
-    /** component to manipulate the image width */
+    /**
+     * component to manipulate the image width
+     */
     private SizeSelectorPanel imgWidth;
-    /** component to manipulate the image height */
+    /**
+     * component to manipulate the image height
+     */
     private SizeSelectorPanel imgHeight;
-    /** component to display the original width of an image */
+    /**
+     * component to display the original width of an image
+     */
     private JLabel oWidth;
-    /** component to display the original height of an image */
+    /**
+     * component to display the original height of an image
+     */
     private JLabel oHeight;
-    /** component to preview an image */
+    /**
+     * component to preview an image
+     */
     private ImagePreview preview;
-    /** component to scroll an image inside the preview */
+    /**
+     * component to scroll an image inside the preview
+     */
     private JScrollPane scPrev;
     /**
      * contains all components having attributes for the image represented
      * in this <code>ImageDialog</code>
      */
     private final Vector attributeComponents = new Vector();
-    /** the help id for this dialog */
+    /**
+     * the help id for this dialog
+     */
     private static final String helpTopicId = "item166";
-    /** the document the image came from, if any */
+    /**
+     * the document the image came from, if any
+     */
     private SHTMLDocument doc;
+
+    public static final String PREF_IMG_DIR = "imgDir";
 
     public ImageDialog(final Window parent, final String title, final SHTMLDocument sourceDoc) {
         super(parent, title, helpTopicId);
@@ -123,14 +152,13 @@ class ImageDialog extends DialogShell implements ActionListener, ListSelectionLi
      * build the dialog contents after construction
      *
      * @param title  the title of this ImageDialog
-     * @param imgDir  the directory of the image repository
      */
     private void initDialog(final String title) {
         Dimension dim;
         // create an image directory panel
         final JPanel dirPanel = new JPanel(new BorderLayout());
         dirPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), Util
-            .getResourceString("imgDirPanelTitle")));
+                .getResourceString("imgDirPanelTitle")));
         // create a list to disply image files in
         imgFileList = new JList();
         dim = new Dimension(100, 100);
@@ -154,7 +182,7 @@ class ImageDialog extends DialogShell implements ActionListener, ListSelectionLi
         // create an image preview panel
         final JPanel previewPanel = new JPanel(new BorderLayout());
         previewPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), Util
-            .getResourceString("imgPreviewPanelTitle")));
+                .getResourceString("imgPreviewPanelTitle")));
         // add a new ImagePreview object to the preview panel
         preview = new ImagePreview();
         dim = new Dimension(250, 250);
@@ -170,10 +198,10 @@ class ImageDialog extends DialogShell implements ActionListener, ListSelectionLi
         final JPanel propertiesPanel = new JPanel(g);
         eastPanel.add(propertiesPanel, BorderLayout.NORTH);
         eastPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), Util
-            .getResourceString("imgPropertiesPanelTitle")));
+                .getResourceString("imgPropertiesPanelTitle")));
         // add scale component
         Util.addGridBagComponent(propertiesPanel, new JLabel(Util.getResourceString("imgScaleLabel")), g, c, 0, 0,
-            GridBagConstraints.EAST);
+                GridBagConstraints.EAST);
         scale = new JTextField();
         scale.addKeyListener(keyHandler);
         scale.addFocusListener(focusHandler);
@@ -186,58 +214,58 @@ class ImageDialog extends DialogShell implements ActionListener, ListSelectionLi
         Util.addGridBagComponent(propertiesPanel, helperPanel, g, c, 1, 0, GridBagConstraints.WEST);
         // add width component
         Util.addGridBagComponent(propertiesPanel, new JLabel(Util.getResourceString("imgWidthLabel")), g, c, 0, 1,
-            GridBagConstraints.EAST);
+                GridBagConstraints.EAST);
         imgWidth = new SizeSelectorPanel(HTML.Attribute.WIDTH, null, false, SizeSelectorPanel.TYPE_LABEL);
         attributeComponents.addElement(imgWidth);
         imgWidth.getValueSelector().addChangeListener(this);
         Util.addGridBagComponent(propertiesPanel, imgWidth, g, c, 1, 1, GridBagConstraints.WEST);
         // add height component
         Util.addGridBagComponent(propertiesPanel, new JLabel(Util.getResourceString("imgHeightLabel")), g, c, 0, 2,
-            GridBagConstraints.EAST);
+                GridBagConstraints.EAST);
         imgHeight = new SizeSelectorPanel(HTML.Attribute.HEIGHT, null, false, SizeSelectorPanel.TYPE_LABEL);
         attributeComponents.addElement(imgHeight);
         imgHeight.getValueSelector().addChangeListener(this);
         Util.addGridBagComponent(propertiesPanel, imgHeight, g, c, 1, 2, GridBagConstraints.WEST);
         // add hspace component
         Util.addGridBagComponent(propertiesPanel, new JLabel(Util.getResourceString("imgHSpaceLabel")), g, c, 0, 3,
-            GridBagConstraints.EAST);
+                GridBagConstraints.EAST);
         final SizeSelectorPanel hSpace = new SizeSelectorPanel(HTML.Attribute.HSPACE, null, false,
-            SizeSelectorPanel.TYPE_LABEL);
+                SizeSelectorPanel.TYPE_LABEL);
         attributeComponents.addElement(hSpace);
         Util.addGridBagComponent(propertiesPanel, hSpace, g, c, 1, 3, GridBagConstraints.WEST);
         // add vspace component
         Util.addGridBagComponent(propertiesPanel, new JLabel(Util.getResourceString("imgVSpaceLabel")), g, c, 0, 4,
-            GridBagConstraints.EAST);
+                GridBagConstraints.EAST);
         final SizeSelectorPanel vSpace = new SizeSelectorPanel(HTML.Attribute.VSPACE, null, false,
-            SizeSelectorPanel.TYPE_LABEL);
+                SizeSelectorPanel.TYPE_LABEL);
         attributeComponents.addElement(vSpace);
         Util.addGridBagComponent(propertiesPanel, vSpace, g, c, 1, 4, GridBagConstraints.WEST);
         // add alignment component
         Util.addGridBagComponent(propertiesPanel, new JLabel(Util.getResourceString("imgAlignLabel")), g, c, 0, 5,
-            GridBagConstraints.EAST);
-        final String[] items = new String[] { Util.getResourceString("imgAlignTop"),
+                GridBagConstraints.EAST);
+        final String[] items = new String[]{Util.getResourceString("imgAlignTop"),
                 Util.getResourceString("imgAlignMiddle"), Util.getResourceString("imgAlignBottom"),
                 Util.getResourceString("imgAlignLeft"), Util.getResourceString("imgAlignCenter"),
-                Util.getResourceString("imgAlignRight") };
-        final String[] names = new String[] { "top", "middle", "bottom", "left", "center", "right" };
+                Util.getResourceString("imgAlignRight")};
+        final String[] names = new String[]{"top", "middle", "bottom", "left", "center", "right"};
         final AttributeComboBox imgAlign = new AttributeComboBox(items, names, null, HTML.Attribute.ALIGN);
         attributeComponents.addElement(imgAlign);
         Util.addGridBagComponent(propertiesPanel, imgAlign, g, c, 1, 5, GridBagConstraints.WEST);
         // add original width component
         Util.addGridBagComponent(propertiesPanel, new JLabel(Util.getResourceString("oWidthLabel")), g, c, 0, 6,
-            GridBagConstraints.EAST);
+                GridBagConstraints.EAST);
         oWidth = new JLabel("");
         Util.addGridBagComponent(propertiesPanel, oWidth, g, c, 1, 6, GridBagConstraints.WEST);
         // add original height component
         Util.addGridBagComponent(propertiesPanel, new JLabel(Util.getResourceString("oHeightLabel")), g, c, 0, 7,
-            GridBagConstraints.EAST);
+                GridBagConstraints.EAST);
         oHeight = new JLabel("");
         Util.addGridBagComponent(propertiesPanel, oHeight, g, c, 1, 7, GridBagConstraints.WEST);
         // add border component
         Util.addGridBagComponent(propertiesPanel, new JLabel(Util.getResourceString("imgBorderLabel")), g, c, 0, 8,
-            GridBagConstraints.EAST);
+                GridBagConstraints.EAST);
         final SizeSelectorPanel imgBorder = new SizeSelectorPanel(HTML.Attribute.BORDER, null, false,
-            SizeSelectorPanel.TYPE_LABEL);
+                SizeSelectorPanel.TYPE_LABEL);
         attributeComponents.addElement(imgBorder);
         Util.addGridBagComponent(propertiesPanel, imgBorder, g, c, 1, 8, GridBagConstraints.WEST);
         // add to content pane of DialogShell
@@ -261,15 +289,14 @@ class ImageDialog extends DialogShell implements ActionListener, ListSelectionLi
     /**
      * set dialog content from a given set of image attributes
      *
-     * @param a  the set of attributes to set dialog contents from
+     * @param a the set of attributes to set dialog contents from
      */
     public void setImageAttributes(final AttributeSet a) {
         //System.out.println("ImageDialog.setImageAttributes");
         ignoreChangeEvents = true;
         originalAttributes.addAttributes(a);
         if (a.isDefined(HTML.Attribute.SRC)) {
-            File imgFile = new File(Util.resolveRelativePath(doc
-                    .getBase(), a.getAttribute(HTML.Attribute.SRC).toString()).getPath());
+            File imgFile = new File(a.getAttribute(HTML.Attribute.SRC).toString());
             //System.out.println("ImageDialog.setImageAttribute imgFile=" + imgFile.getAbsolutePath());
             imgFileList.setSelectedValue(imgFile.getName().toLowerCase(), true);
         }
@@ -298,8 +325,7 @@ class ImageDialog extends DialogShell implements ActionListener, ListSelectionLi
             if (h != null && h.length() > 0) {
                 preview.setPreviewHeight(Integer.parseInt(h));
             }
-        }
-        catch (final Exception e) {
+        } catch (final Exception e) {
             Util.errMsg(this, null, e);
         }
     }
@@ -318,8 +344,7 @@ class ImageDialog extends DialogShell implements ActionListener, ListSelectionLi
         set.addAttribute(HTML.Attribute.SRC, getImageSrc());
         try {
             w.writeStartTag(HTML.Tag.IMG.toString(), set);
-        }
-        catch (final Exception e) {
+        } catch (final Exception e) {
             Util.errMsg(this, e.getMessage(), e);
         }
         return sw.getBuffer().toString();
@@ -334,11 +359,12 @@ class ImageDialog extends DialogShell implements ActionListener, ListSelectionLi
         final StringBuffer buf = new StringBuffer();
         final Object value = imgFileList.getSelectedValue();
         if (value != null) {
+            buf.append("file:\\");
             buf.append(doc.getImageDirectoryName());
             buf.append(Util.URL_SEPARATOR);
             buf.append(value.toString());
         }
-        return  buf.toString();
+        return buf.toString();
     }
 
     /**
@@ -356,6 +382,7 @@ class ImageDialog extends DialogShell implements ActionListener, ListSelectionLi
             filter.setDescription(Util.getResourceString("imageFileDesc"));
             chooser.setFileFilter(filter);
             if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                Preferences.userRoot().put(ImageDialog.PREF_IMG_DIR,chooser.getSelectedFile().getParent());
                 final File[] sFiles = chooser.getSelectedFiles();
                 File imgDir = doc.getImageDirectory();
                 if (!imgDir.exists()) {
@@ -368,8 +395,7 @@ class ImageDialog extends DialogShell implements ActionListener, ListSelectionLi
                     updateFileList();
                 }
             }
-        }
-        catch (final Exception e) {
+        } catch (final Exception e) {
             Util.errMsg(this, e.getMessage(), e);
         }
     }
@@ -436,15 +462,14 @@ class ImageDialog extends DialogShell implements ActionListener, ListSelectionLi
         try {
             preview.setScale(Integer.parseInt(scale.getText()));
             updateControls();
-        }
-        catch (final Exception e) {
+        } catch (final Exception e) {
         }
         ignoreChangeEvents = false;
     }
 
     /**
      * apply a new width set by the user and update
-     *  all related image property displays
+     * all related image property displays
      */
     private void applyPreviewWidth() {
         //System.out.println("applyPreviewWidth width=" + imgWidth.getIntValue().intValue());
@@ -464,7 +489,7 @@ class ImageDialog extends DialogShell implements ActionListener, ListSelectionLi
 
     /**
      * apply a new height set by the user and update
-     *  all related image property displays
+     * all related image property displays
      */
     private void applyPreviewHeight() {
         //System.out.println("applyPreviewHeight height=" + imgHeight.getIntValue().intValue());
@@ -483,6 +508,7 @@ class ImageDialog extends DialogShell implements ActionListener, ListSelectionLi
     }
 
     /* ---------------- event handling start ------------------------- */
+
     /**
      * implements the ActionListener interface to be notified of
      * clicks onto the file repository buttons.
@@ -491,11 +517,9 @@ class ImageDialog extends DialogShell implements ActionListener, ListSelectionLi
         final Object src = e.getSource();
         if (src == addImgBtn) {
             handleAddImage();
-        }
-        else if (src == delImgBtn) {
+        } else if (src == delImgBtn) {
             handleDeleteImage();
-        }
-        else {
+        } else {
             super.actionPerformed(e);
         }
     }
@@ -515,8 +539,7 @@ class ImageDialog extends DialogShell implements ActionListener, ListSelectionLi
             preview.setImage(new ImageIcon(imgDir.getAbsolutePath() + File.separator
                     + imgFileList.getSelectedValue().toString()));
             updateControls();
-        }
-        else {
+        } else {
             preview.setImage(null);
             final int vWidth = scPrev.getWidth() - 5;
             final int vHeight = scPrev.getHeight() - 5;
@@ -586,8 +609,7 @@ class ImageDialog extends DialogShell implements ActionListener, ListSelectionLi
             final Object source = e.getSource();
             if (source.equals(imgWidth.getValueSelector())) {
                 applyPreviewWidth();
-            }
-            else if (source.equals(imgHeight.getValueSelector())) {
+            } else if (source.equals(imgHeight.getValueSelector())) {
                 applyPreviewHeight();
             }
         }
